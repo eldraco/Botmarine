@@ -19,7 +19,7 @@
         pastDate.setMinutes(startDate.getMinutes() - window_length)
         console.log('From ' + pastDate + 'to ' + startDate);
         //$.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate) + '&callback=?', function(data){
-        $.getJSON('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate, function(data){
+        $.getJSON('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate.toISOString() + '&happened_before='+ startDate.toISOString(), function(data){
             var count = Object.keys(data.contents._embedded.events).length
             console.log(count)
             palofunction(data.contents._embedded.events);
