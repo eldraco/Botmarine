@@ -10,22 +10,32 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic/1.json') + '&callback=?', function(data){
-            console.log(data.contents.event_id);
-            console.log(data.contents.happened_at);
-            palofunction(data.contents);
-        });
-    });
-</script>
+    function queryAPI(startDate) {
+        var currentdate = new Date(startDate)
+        var window_length = 1;
+        currentdate.setMinutes(startDate.getMinutes() + window_length)
+        console.log(currentdate);
+        $.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + currentdate) + '&callback=?', function(data){
+            //console.log(data.contents._embedded.events);
+            palofunction(data.contents._embedded.events);
+            setTimeout(queryAPI(currentdate),1000);
+            })
+        ;}
 
+    $(document).ready(
+            // When we want to be realtime
+            // var startDate = new Date();
+            queryAPI(new Date('2015-02-21T12:23:38.264Z')));
+</script>
 
 
 <script>
     function palofunction (newevent) {
+        //console.log(newevent[0]);
         var body = d3.select("body");
         var div = body.append("div");
-        div.html(newevent.happened_at);
+        div.html(newevent[0].event_id);
+        div.html(newevent[0].happened_at);
     }
 </script>
 
