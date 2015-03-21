@@ -10,19 +10,22 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 
 <script>
-    function queryAPI() {
-        var currentdate = new Date();
-        //console.log(currentdate);
+    function queryAPI(startDate) {
+        var currentdate = new Date(startDate)
+        var window_length = 1;
+        currentdate.setMinutes(startDate.getMinutes() + window_length)
+        console.log(currentdate);
         $.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + currentdate) + '&callback=?', function(data){
             //console.log(data.contents._embedded.events);
             palofunction(data.contents._embedded.events);
-            setTimeout("queryAPI()",1000);
+            setTimeout(queryAPI(currentdate),1000);
             })
         ;}
 
     $(document).ready(
-            queryAPI()
-    );
+            // When we want to be realtime
+            // var startDate = new Date();
+            queryAPI(new Date('2015-02-21T12:23:38.264Z')));
 </script>
 
 
