@@ -17,13 +17,13 @@
 </head>
 <body>
 
-<svg id="svg" width="100%" height="100%">
+<svg id="svg" width="100%" height="500">
 </svg>
 
 <script>
     function queryAPI(startDate) {
         var pastDate = new Date(startDate)
-        var window_length = 10;
+        var window_length = 1;
         pastDate.setMinutes(startDate.getMinutes() - window_length)
         console.log('From ' + pastDate + 'to ' + startDate);
         //$.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate) + '&callback=?', function(data){
@@ -34,7 +34,7 @@
             mainFunction(data._embedded.events);
             var nextdate = new Date(startDate)
             nextdate.setMinutes(startDate.getMinutes() + window_length)
-            setTimeout(queryAPI(nextdate), 1000);
+            setTimeout(queryAPI(nextdate), 10000);
         })
         ;
     }
@@ -42,7 +42,7 @@
     $(document).ready(
             // When we want to be realtime
             // var startDate = new Date();
-            queryAPI(new Date('2015-03-21T16:23:38.264Z')));
+            queryAPI(new Date('2015-03-21T16:00:38.264Z')));
 </script>
 
 
@@ -51,13 +51,12 @@
 
     var svgHeight = $("#svg").height();
 
-
     var nodes = {};
     var bubbles = {};
-    var radius = 10;
-    var margin = 5;
+    var radius = 30;
+    var margin = 15;
     var lastX = -radius;
-    var yDecrement = 20;
+//    var yDecrement = 5;
 
     function mainFunction(events) {
         console.log("# of events " + events.length);
@@ -137,7 +136,8 @@
             var totalMaxRobustness = 0;
             var totalCurrentRobustness = 0;
             console.log(bubble.systems);
-//            if (bubble.systems.length) {
+
+            if (Object.keys(bubble.systems).length != 0) {
 
                 for (var sys in bubble.systems) {
                     console.log("system health: " + bubble.systems[sys].health);
@@ -161,7 +161,12 @@
                         .attr("r", bubble.radius)
                         .style("fill", "darkblue");
 
-//            }
+                /* Create the text for each block */
+                svg.append("text").text(bubble.name)
+                        .attr('x', bubble.x)
+                        .attr('y', newY)
+                        .style("fill", "red");
+            }
         }
 
     }
