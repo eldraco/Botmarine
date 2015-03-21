@@ -2,6 +2,9 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>
     <title></title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 
@@ -11,14 +14,18 @@
 
 <script>
     function queryAPI(startDate) {
-        var currentdate = new Date(startDate)
+        var pastDate = new Date(startDate)
         var window_length = 1;
-        currentdate.setMinutes(startDate.getMinutes() + window_length)
-        console.log(currentdate);
-        $.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + currentdate) + '&callback=?', function(data){
-            //console.log(data.contents._embedded.events);
+        pastDate.setMinutes(startDate.getMinutes() - window_length)
+        console.log('From ' + pastDate + 'to ' + startDate);
+        //$.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate) + '&callback=?', function(data){
+        $.getJSON('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate, function(data){
+            var count = Object.keys(data.contents._embedded.events).length
+            console.log(count)
             palofunction(data.contents._embedded.events);
-            setTimeout(queryAPI(currentdate),1000);
+            var nextdate = new Date(startDate)
+            nextdate.setMinutes(startDate.getMinutes() + window_length)
+            setTimeout(queryAPI(nextdate),1000);
             })
         ;}
 
