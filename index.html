@@ -10,87 +10,156 @@
 </head>
 <body>
 
-<svg width="720" height="120">
-
+<svg id="svg" width="100%" height="100%">
 </svg>
 
 <script>
-    $(document).ready(function() {
+        function queryAPI(startDate) {
+            var pastDate = new Date(startDate)
+            var window_length = 1;
+            pastDate.setMinutes(startDate.getMinutes() - window_length)
+//            console.log('From ' + pastDate + 'to ' + startDate);
+            //$.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate) + '&callback=?', function(data){
+//            $.getJSON('http://csob-hackathon.herokuapp.com:80/api/v1/traffic1.json?happened_after=' + pastDate.toISOString() + '&happened_before='+ startDate.toISOString(), function(data){
+            $.getJSON('http://localhost:8888/jsons/traffic1.json', function(data){
+                var count = Object.keys(data._embedded.events).length
+    //            console.log(count)
+                palofunction(data._embedded.events);
+                var nextdate = new Date(startDate)
+                nextdate.setMinutes(startDate.getMinutes() + window_length)
+//                setTimeout(queryAPI(nextdate),1000);
+            })
+            ;}
 
-        $.getJSON('http://localhost:8888/jsons/events.json', function(data){
-            palofunction(data.events);
-        });
-    });
+        $(document).ready(
+                // When we want to be realtime
+                // var startDate = new Date();
+                queryAPI(new Date('2015-03-21T05:00:00.264Z')));
 </script>
 
 
 <script>
     var svg = d3.select("svg");
-    console.log(svg);
+
+    var svgHeight = $("#svg").height();
+
+//    svg.append("circle")
+//            .attr("cy", svgHeight - 40)
+//            .attr("cx", 40)
+//            .attr("r", 10)
+//            .style("fill", "green");
+//
+//    svg.append("circle")
+//            .attr("cy", svgHeight - 30)
+//            .attr("cx", 60)
+//            .attr("r", 10)
+//            .style("fill", "green");
+//
+//    svg.append("circle")
+//            .attr("cy", svgHeight)
+//            .attr("cx", 0)
+//            .attr("r", 10)
+//            .style("fill", "green");
 
     var nodes = {};
     var bubbles = {};
-    var radius = 30;
-    var margin = 10;
+    var radius = 10;
+    var margin = 5;
     var lastX = -radius;
-    var yIncrement = 30;
+    var yDecrement = 20;
 
-    function palofunction (events) {
-        console.log(events)
+    function palofunction(events) {
+        console.log("# of events " + events.length);
 
         for (var i = 0; i < events.length; i++) {
-            console.log(events[i]);
-            //Do something
-
+            console.log("iteration: " + i);
             var node = events[i]._embedded.node;
-            var nodeId = node.id;
-            var system = events[i]._embedded.system;
-            var layer = events[i]._embedded.layer;
 
-            if (bubbles[nodeId] == null) {
-                lastX += 2*radius + margin;
+            if (node != null) {
 
-                var systems = {};
+                var nodeId = node.id;
+                console.log("Node id: " + nodeId);
 
-                if (system != null) {
-                    systems[system.name] = {
-                        "system": system,
-                        "health": (layer == null) ? 0 : layer.current_robustness
-                    };
-                }
+                var system = events[i]._embedded.system;
+                var layer = events[i]._embedded.layer;
 
-                var bubble = {
-                    "ip_address" : node.ip_address,
-                    "name": node.venue_name,
-                    "x" : lastX,
-                    "y" : radius,
-                    "radius" : radius,
-                    "systems" : systems
-                };
+                if (bubbles[nodeId] == null) {
+                    // First time we see this bubble
+                    lastX += 2 * radius + margin;
+//                    if (layer != null) {
+                        console.log("first appearance of bubble id is " + nodeId + " : " + layer);
+//                    }
 
-                bubbles[nodeId] = bubble;
-            } else {
+                    var systems = {};
 
-                var bubble = bubbles[nodeId];
-
-                if (system != null && bubble.systems[system.name] != null) {
-                    var oldHealth = bubble.systems[system.name];
-
-                    if (layer != null) {
-                        if (layer.current_robustness < oldHealth) {
-                            bubble.y = bubble.y + yIncrement;
-                        }
+                    if (system != null) {
+                        systems[system.name] = {
+                            "system": system,
+                            "health": (layer == null) ? 0 : layer.current_robustness
+                        };
                     }
+//
+                    var bubble = {
+                        "ip_address": node.ip_address,
+                        "name": node.venue_name,
+                        "x": lastX,
+                        "y": svgHeight - radius,
+                        "radius": radius,
+                        "systems": systems
+                    };
+
+                    bubbles[nodeId] = bubble;
+                } else {
+                    // We saw the bubble before
+                    var bubble = bubbles[nodeId];
+
+
+                    console.log(system);
+//                    console.log(bubble.systems[system.name]);
+                    if (system != null) {
+
+                        if (bubble.systems[system.name] != null) {
+                            var oldHealth = bubble.systems[system.name].health;
+                            console.log("Layer " + layer);
+
+                            if (layer != null) {
+                                console.log("Bubble id is " + nodeId + " : " + layer.current_robustness);
+//                            console.log(bubbles[nodeId].y);
+
+                                if (layer.current_robustness < oldHealth) {
+                                    bubble.y = bubble.y - yDecrement;
+                                }
+//                                else if (layer.current_robustness > oldHealth) {
+//                                    bubble.y = bubble.y + yDecrement;
+//                                }
+
+                                oldHealth = layer.current_robustness;
+                            }
+
+                            bubbles[nodeId] = bubble;
+                        } else {
+
+                            bubbles[nodeId].systems[system.name] = {
+                                "system": system,
+                                "health": (layer == null) ? 0 : layer.current_robustness
+                            }
+                        }
+
+                    }
+
+
+//                    console.log(bubbles[nodeId].y);
                 }
 
-                bubbles[nodeId] = bubble;
             }
         }
 
-        console.log(bubbles);
 
-        for(var bubbleId in bubbles) {
-            console.log(bubble);
+        console.log(bubbles);
+        svg.selectAll("*").remove();
+
+        for (var bubbleId in bubbles) {
+//            console.log(bubble);
             var bubble = bubbles[bubbleId];
 
             svg.append("circle")
