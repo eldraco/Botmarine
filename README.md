@@ -1,5 +1,6 @@
 # Botmarine
 An attack interactive visualization tool that was created during the 2015 #CSOBhackaton.
+It uses JavasScript and d3.js libraries
 
 
 # How to query the API
@@ -17,6 +18,4 @@ An attack interactive visualization tool that was created during the 2015 #CSOBh
 
 ## Specific node
 http://csob-hackathon.herokuapp.com:80/api/v1/nodes/12.json
-
-
 http://csob-hackathon.herokuapp.com:80/api/v1/systems.json

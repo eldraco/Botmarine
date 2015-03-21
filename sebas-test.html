@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+</head>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic/1.json') + '&callback=?', function(data){
+            console.log(data.contents.event_id);
+            console.log(data.contents.happened_at);
+            palofunction(data.contents);
+        });
+    });
+</script>
+
+
+
+<script>
+    function palofunction (newevent) {
+        var body = d3.select("body");
+        var div = body.append("div");
+        div.html(newevent.happened_at);
+    }
+</script>
+
+
+
+</body>
+</html>
