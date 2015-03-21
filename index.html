@@ -7,6 +7,13 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 
+    <style type="text/css">
+        body {
+            background-image: url("images/background1.jpg");
+            background-repeat: repeat;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -14,27 +21,28 @@
 </svg>
 
 <script>
-        function queryAPI(startDate) {
-            var pastDate = new Date(startDate)
-            var window_length = 1;
-            pastDate.setMinutes(startDate.getMinutes() - window_length)
-//            console.log('From ' + pastDate + 'to ' + startDate);
-            //$.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate) + '&callback=?', function(data){
-//            $.getJSON('http://csob-hackathon.herokuapp.com:80/api/v1/traffic1.json?happened_after=' + pastDate.toISOString() + '&happened_before='+ startDate.toISOString(), function(data){
-            $.getJSON('http://localhost:8888/jsons/traffic1.json', function(data){
-                var count = Object.keys(data._embedded.events).length
-    //            console.log(count)
-                palofunction(data._embedded.events);
-                var nextdate = new Date(startDate)
-                nextdate.setMinutes(startDate.getMinutes() + window_length)
-//                setTimeout(queryAPI(nextdate),1000);
-            })
-            ;}
+    function queryAPI(startDate) {
+        var pastDate = new Date(startDate)
+        var window_length = 10;
+        pastDate.setMinutes(startDate.getMinutes() - window_length)
+        console.log('From ' + pastDate + 'to ' + startDate);
+        //$.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate) + '&callback=?', function(data){
+        $.getJSON('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate.toISOString() + '&happened_before=' + startDate.toISOString(), function (data) {
+//        $.getJSON('http://localhost:8888/jsons/traffic1.json', function(data){
+            var count = Object.keys(data._embedded.events).length
+            console.log(count)
+            mainFunction(data._embedded.events);
+            var nextdate = new Date(startDate)
+            nextdate.setMinutes(startDate.getMinutes() + window_length)
+            setTimeout(queryAPI(nextdate), 1000);
+        })
+        ;
+    }
 
-        $(document).ready(
-                // When we want to be realtime
-                // var startDate = new Date();
-                queryAPI(new Date('2015-03-21T05:00:00.264Z')));
+    $(document).ready(
+            // When we want to be realtime
+            // var startDate = new Date();
+            queryAPI(new Date('2015-03-21T16:23:38.264Z')));
 </script>
 
 
@@ -43,23 +51,6 @@
 
     var svgHeight = $("#svg").height();
 
-//    svg.append("circle")
-//            .attr("cy", svgHeight - 40)
-//            .attr("cx", 40)
-//            .attr("r", 10)
-//            .style("fill", "green");
-//
-//    svg.append("circle")
-//            .attr("cy", svgHeight - 30)
-//            .attr("cx", 60)
-//            .attr("r", 10)
-//            .style("fill", "green");
-//
-//    svg.append("circle")
-//            .attr("cy", svgHeight)
-//            .attr("cx", 0)
-//            .attr("r", 10)
-//            .style("fill", "green");
 
     var nodes = {};
     var bubbles = {};
@@ -68,7 +59,7 @@
     var lastX = -radius;
     var yDecrement = 20;
 
-    function palofunction(events) {
+    function mainFunction(events) {
         console.log("# of events " + events.length);
 
         for (var i = 0; i < events.length; i++) {
@@ -86,9 +77,8 @@
                 if (bubbles[nodeId] == null) {
                     // First time we see this bubble
                     lastX += 2 * radius + margin;
-//                    if (layer != null) {
-                        console.log("first appearance of bubble id is " + nodeId + " : " + layer);
-//                    }
+
+                    console.log("first appearance of bubble id is " + nodeId + " : " + layer);
 
                     var systems = {};
 
@@ -98,7 +88,7 @@
                             "health": (layer == null) ? 0 : layer.current_robustness
                         };
                     }
-//
+
                     var bubble = {
                         "ip_address": node.ip_address,
                         "name": node.venue_name,
@@ -111,32 +101,15 @@
                     bubbles[nodeId] = bubble;
                 } else {
                     // We saw the bubble before
-                    var bubble = bubbles[nodeId];
 
-
-                    console.log(system);
-//                    console.log(bubble.systems[system.name]);
                     if (system != null) {
 
-                        if (bubble.systems[system.name] != null) {
-                            var oldHealth = bubble.systems[system.name].health;
+                        if (bubbles[nodeId].systems[system.name] != null) {
+
                             console.log("Layer " + layer);
-
                             if (layer != null) {
-                                console.log("Bubble id is " + nodeId + " : " + layer.current_robustness);
-//                            console.log(bubbles[nodeId].y);
-
-                                if (layer.current_robustness < oldHealth) {
-                                    bubble.y = bubble.y - yDecrement;
-                                }
-//                                else if (layer.current_robustness > oldHealth) {
-//                                    bubble.y = bubble.y + yDecrement;
-//                                }
-
-                                oldHealth = layer.current_robustness;
+                                bubbles[nodeId].systems[system.name].health = layer.current_robustness;
                             }
-
-                            bubbles[nodeId] = bubble;
                         } else {
 
                             bubbles[nodeId].systems[system.name] = {
@@ -146,30 +119,55 @@
                         }
 
                     }
-
-
-//                    console.log(bubbles[nodeId].y);
                 }
 
             }
-        }
 
+
+        }
 
         console.log(bubbles);
         svg.selectAll("*").remove();
 
         for (var bubbleId in bubbles) {
-//            console.log(bubble);
+
+
             var bubble = bubbles[bubbleId];
 
-            svg.append("circle")
-                    .attr("cy", bubble.y)
-                    .attr("cx", bubble.x)
-                    .attr("r", bubble.radius)
-                    .style("fill", "green");
+            var totalMaxRobustness = 0;
+            var totalCurrentRobustness = 0;
+            console.log(bubble.systems);
+//            if (bubble.systems.length) {
+
+                for (var sys in bubble.systems) {
+                    console.log("system health: " + bubble.systems[sys].health);
+                    totalMaxRobustness += bubble.systems[sys].system.max_robustness;
+                    totalCurrentRobustness += bubble.systems[sys].health;
+                }
+
+                console.log(totalCurrentRobustness);
+                console.log(totalMaxRobustness);
+                console.log("health " + (totalCurrentRobustness / totalMaxRobustness));
+
+
+                var nodeHealth = (totalCurrentRobustness / totalMaxRobustness);
+                var newY = nodeHealth.map(0, 1, 0, svgHeight);
+
+                console.log(newY);
+
+                svg.append("circle")
+                        .attr("cy", newY)
+                        .attr("cx", bubble.x)
+                        .attr("r", bubble.radius)
+                        .style("fill", "darkblue");
+
+//            }
         }
 
+    }
 
+    Number.prototype.map = function (in_min, in_max, out_min, out_max) {
+        return ( this - in_min ) * ( out_max - out_min ) / ( in_max - in_min ) + out_min;
     }
 
 </script>
