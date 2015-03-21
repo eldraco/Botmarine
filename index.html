@@ -5,6 +5,8 @@
     <title>Botmarine</title>
 
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
 </head>
 <body>
 
@@ -13,18 +15,93 @@
 </svg>
 
 <script>
+    $(document).ready(function() {
+
+        $.getJSON('http://localhost:8888/jsons/events.json', function(data){
+            palofunction(data.events);
+        });
+    });
+</script>
+
+
+<script>
     var svg = d3.select("svg");
     console.log(svg);
-    svg.append("circle")
-            .attr("cy", 60)
-            .attr("cx", 80)
-            .attr("r", 30);
 
-    svg.append("circle")
-            .attr("cy", 70)
-            .attr("cx", 90)
-            .attr("r", 10)
-            .style("fill", "steelblue");
+    var nodes = {};
+    var bubbles = {};
+    var radius = 30;
+    var margin = 10;
+    var lastX = -radius;
+    var yIncrement = 30;
+
+    function palofunction (events) {
+        console.log(events)
+
+        for (var i = 0; i < events.length; i++) {
+            console.log(events[i]);
+            //Do something
+
+            var node = events[i]._embedded.node;
+            var nodeId = node.id;
+            var system = events[i]._embedded.system;
+            var layer = events[i]._embedded.layer;
+
+            if (bubbles[nodeId] == null) {
+                lastX += 2*radius + margin;
+
+                var systems = {};
+
+                if (system != null) {
+                    systems[system.name] = {
+                        "system": system,
+                        "health": (layer == null) ? 0 : layer.current_robustness
+                    };
+                }
+
+                var bubble = {
+                    "ip_address" : node.ip_address,
+                    "name": node.venue_name,
+                    "x" : lastX,
+                    "y" : radius,
+                    "radius" : radius,
+                    "systems" : systems
+                };
+
+                bubbles[nodeId] = bubble;
+            } else {
+
+                var bubble = bubbles[nodeId];
+
+                if (system != null && bubble.systems[system.name] != null) {
+                    var oldHealth = bubble.systems[system.name];
+
+                    if (layer != null) {
+                        if (layer.current_robustness < oldHealth) {
+                            bubble.y = bubble.y + yIncrement;
+                        }
+                    }
+                }
+
+                bubbles[nodeId] = bubble;
+            }
+        }
+
+        console.log(bubbles);
+
+        for(var bubbleId in bubbles) {
+            console.log(bubble);
+            var bubble = bubbles[bubbleId];
+
+            svg.append("circle")
+                    .attr("cy", bubble.y)
+                    .attr("cx", bubble.x)
+                    .attr("r", bubble.radius)
+                    .style("fill", "green");
+        }
+
+
+    }
 
 </script>
 
