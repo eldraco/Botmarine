@@ -14,13 +14,20 @@
         $.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic/1.json') + '&callback=?', function(data){
             console.log(data.contents.event_id);
             console.log(data.contents.happened_at);
-            //var body = d3.select("body");
-            //var div = body.append("div");
-            //div.html("Hello, world!");
+            palofunction(data.contents);
         });
     });
 </script>
 
+
+
+<script>
+    function palofunction (newevent) {
+        var body = d3.select("body");
+        var div = body.append("div");
+        div.html(newevent.happened_at);
+    }
+</script>
 
 
 
