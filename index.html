@@ -7,8 +7,16 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 
+    <style type="text/css">
+        body {
+            background-image: url("images/background1.jpg");
+            background-repeat: repeat;
+        }
+    </style>
+
 </head>
 <body>
+
 
 <svg id="svg" width="100%" height="100%">
 </svg>
@@ -21,7 +29,7 @@
 //            console.log('From ' + pastDate + 'to ' + startDate);
             //$.getJSON('http://whateverorigin.org/get?url=' + encodeURIComponent('http://csob-hackathon.herokuapp.com:80/api/v1/traffic.json?happened_after=' + pastDate + '&happened_before='+ startDate) + '&callback=?', function(data){
 //            $.getJSON('http://csob-hackathon.herokuapp.com:80/api/v1/traffic1.json?happened_after=' + pastDate.toISOString() + '&happened_before='+ startDate.toISOString(), function(data){
-            $.getJSON('http://localhost:8888/jsons/traffic1.json', function(data){
+            $.getJSON('http://localhost:8000/jsons/traffic1.json', function(data){
                 var count = Object.keys(data._embedded.events).length
     //            console.log(count)
                 palofunction(data._embedded.events);
