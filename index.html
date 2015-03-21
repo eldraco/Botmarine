@@ -2,9 +2,32 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title></title>
+    <title>Botmarine</title>
+
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 <body>
+
+<svg width="720" height="120">
+
+</svg>
+
+<script>
+    var svg = d3.select("svg");
+    console.log(svg);
+    svg.append("circle")
+            .attr("cy", 60)
+            .attr("cx", 80)
+            .attr("r", 30);
+
+    svg.append("circle")
+            .attr("cy", 70)
+            .attr("cx", 90)
+            .attr("r", 10)
+            .style("fill", "steelblue");
+
+</script>
+
 
 </body>
 </html>
